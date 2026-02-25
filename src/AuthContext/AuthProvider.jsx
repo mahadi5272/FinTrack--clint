@@ -9,7 +9,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "../firebase.config";
-import axios from "axios"; // axios ইনস্টল করা না থাকলে npm i axios করে নিন
+import axios from "axios";
 
 export const AuthContext = createContext();
 const googleProvider = new GoogleAuthProvider();
@@ -37,7 +37,7 @@ const AuthProvider = ({ children }) => {
     return signOut(auth);
   };
 
-  // ৪. গুগল দিয়ে সাইন ইন
+  // ৪. গুগল দিয়ে সাইন ইন
   const signInWithGoogle = () => {
     setLoading(true);
     return signInWithPopup(auth, googleProvider);
@@ -53,33 +53,36 @@ const AuthProvider = ({ children }) => {
 
   // ৬. অথ অবজার্ভার এবং JWT লজিক
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       
       if (currentUser) {
-        // ইউজার লগইন থাকলে টোকেন সংগ্রহ করা
         const userInfo = { email: currentUser.email };
-        axios.post('http://localhost:3000/jwt', userInfo)
-          .then(res => {
-            if (res.data.token) {
-              localStorage.setItem('access-token', res.data.token);
-              setLoading(false);
-            }
-          })
-          .catch(err => {
-            console.error("JWT Error:", err);
+        
+        try {
+          // প্রথমে JWT টোকেন সংগ্রহ করা
+          const res = await axios.post('http://localhost:3000/jwt', userInfo);
+          
+          if (res.data.token) {
+            const token = res.data.token;
+            localStorage.setItem('access-token', token);
+
+            // টোকেন পাওয়ার পর সেটি হেডারে পাঠিয়ে রোল চেক করা
+            const roleRes = await axios.get(`http://localhost:3000/users/${currentUser.email}`, {
+              headers: {
+                authorization: `Bearer ${token}`
+              }
+            });
+            
+            setRole(roleRes.data?.role);
             setLoading(false);
-          });
-
-        // ইউজারের রোল চেক করা
-        axios.get(`http://localhost:3000/users/${currentUser.email}`)
-          .then(res => {
-            setRole(res.data.role);
-          })
-          .catch(() => console.log("Role fetch error"));
-
+          }
+        } catch (err) {
+          console.error("Auth initialization error:", err);
+          localStorage.removeItem('access-token');
+          setLoading(false);
+        }
       } else {
-        // ইউজার লগআউট করলে টোকেন মুছে ফেলা
         localStorage.removeItem('access-token');
         setRole(null);
         setLoading(false);
