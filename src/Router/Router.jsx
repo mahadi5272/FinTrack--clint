@@ -4,7 +4,6 @@ import Login from "../Authintication/Login";
 import AddCategory from "../Pages/Admin/AddCategory";
 import AddTransaction from "../Pages/Users/AddTransaction";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
-import UserHome from "../Pages/Users/UserHome";
 import TransactionHistory from "../Pages/Users/TransactionHistory";
 import SavingsGoal from "../Pages/Users/SavingsGoal";
 import AddTip from "../Pages/Admin/AddTip";
@@ -17,6 +16,7 @@ import ServicePage from "../Pages/Home/ServicePage";
 import AboutPage from "../Pages/Home/AboutPage";
 import Contact from "../Pages/Home/Contact";
 import PrivateRoute from "./PrivateRoute";
+import UserHomes from "../Pages/Users/UserHomes";
 
 export const router = createBrowserRouter([
   {
@@ -70,7 +70,7 @@ export const router = createBrowserRouter([
     element:<PrivateRoute><DashboardLayout /></PrivateRoute> , // মেইন লেআউট
     children: [
       // ইউজার রাউটস
-      { path: "userHome", element: <UserHome /> },
+      { path: "userHome", element: <UserHomes /> },
       { path: "addTransaction", element: <AddTransaction /> },
       { path: "history", element: <TransactionHistory /> },
       { path: "savingsGoal", element: <SavingsGoal /> },

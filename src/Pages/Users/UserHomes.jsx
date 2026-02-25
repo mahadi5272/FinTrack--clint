@@ -5,7 +5,7 @@ import { Wallet, ArrowUpCircle, ArrowDownCircle, Lightbulb, TrendingUp, AlertCir
 import { AuthContext } from "../../AuthContext/AuthProvider";
 import ExpenseChart from "./ExpenseChart";
 
-const UserHome = () => {
+const UserHomes = () => {
   const { user } = useContext(AuthContext);
   const axiosSecure = useAxiosSecure(); 
   const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
@@ -127,4 +127,4 @@ const UserHome = () => {
   );
 };
 
-export default UserHome;
+export default UserHomes;
