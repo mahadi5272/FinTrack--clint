@@ -1,0 +1,2 @@
+# login , signUp , AuthProvider ,AddCategory,AddTransaction , dashbordlayout
+# UserHome , Transaction History ,Savings Goal , ExpenseChart , AddTip and userHome ee admin pager er AddTip get kore show korci ! ,4.1 Admin Role , Financial Report Monitoring
