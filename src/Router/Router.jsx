@@ -4,7 +4,7 @@ import Login from "../Authintication/Login";
 import AddCategory from "../Pages/Admin/AddCategory";
 import AddTransaction from "../Pages/Users/AddTransaction";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
-import UserHome from "../Pages/Users/userHome";
+import UserHome from "../Pages/Users/UserHome";
 import TransactionHistory from "../Pages/Users/TransactionHistory";
 import SavingsGoal from "../Pages/Users/SavingsGoal";
 import AddTip from "../Pages/Admin/AddTip";
