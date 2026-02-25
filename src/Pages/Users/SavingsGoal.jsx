@@ -1,11 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
+// axios এর বদলে useAxiosSecure ইম্পোর্ট করা হয়েছে
+import useAxiosSecure from "../../hooks/axiosSecure"; 
+// শুধু এই একটি লাইন রাখলেই হবে, কারণ আপনি নিচে এগুলোকে রিনেম (As) করে ব্যবহার করছেন
 import { Target, TrendingUp, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Target as TargetIcon, TrendingUp as TrendingIcon, Clock as ClockIcon, CheckCircle2 as CheckIcon, AlertCircle as AlertIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../AuthContext/AuthProvider";
 
 const SavingsGoal = () => {
   const { user } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure(); // axios এর জায়গায় এটি ব্যবহার হবে
   const [goal, setGoal] = useState(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -14,17 +18,18 @@ const SavingsGoal = () => {
     if (user?.email) {
       fetchGoalData();
     }
-  }, [user]);
+  }, [user?.email, axiosSecure]); // dependency তে axiosSecure দিন
 
   const fetchGoalData = async () => {
     setLoading(true);
     try {
-      // ইউজারের বর্তমান ব্যালেন্স এবং গোল ডাটা ফেচ করা
+      // ইউজারের বর্তমান ব্যালেন্স এবং গোল ডাটা ফেচ করা (টোকেন সহ)
       const [statsRes, goalRes] = await Promise.all([
-        axios.get(`http://localhost:3000/user-stats/${user?.email}`),
-        axios.get(`http://localhost:3000/savings-goal/${user?.email}`)
+        axiosSecure.get(`/user-stats/${user?.email}`),
+        // সার্ভার রুটের সাথে মিলিয়ে /savings-goal/:email রুটটি আপডেট করা হয়েছে
+        axiosSecure.get(`/savings-goal/${user?.email}`) 
       ]);
-      setBalance(statsRes.data.balance);
+      setBalance(statsRes.data.balance || 0);
       setGoal(goalRes.data);
     } catch (err) {
       console.error("Error fetching goal data", err);
@@ -43,17 +48,20 @@ const SavingsGoal = () => {
     };
     
     try {
-      const res = await axios.post("http://localhost:3000/savings-goal", goalData);
+      // POST রিকোয়েস্টেও এখন টোকেন যাবে
+      const res = await axiosSecure.post("/savings-goal", goalData);
       if (res.data.acknowledged || res.data.upsertedCount > 0 || res.data.modifiedCount > 0) {
         toast.success("Savings goal set successfully!");
         setGoal(goalData);
+        // ডাটা আপডেট হওয়ার পর আবার ব্যালেন্স চেক করা
+        fetchGoalData();
       }
     } catch (err) {
       toast.error("Failed to set goal");
     }
   };
 
-  // রিকোয়ারমেন্ট অনুযায়ী ক্যালকুলেশন
+  // ক্যালকুলেশন
   const progress = goal ? Math.min((balance / goal.targetAmount) * 100, 100).toFixed(1) : 0;
   const remaining = goal ? Math.max(goal.targetAmount - balance, 0) : 0;
   const isCompleted = progress >= 100;
@@ -66,17 +74,17 @@ const SavingsGoal = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <Target className="text-indigo-600" size={32} /> Savings Goal Tracker
+            <TargetIcon className="text-indigo-600" size={32} /> Savings Goal Tracker
           </h2>
           <p className="text-slate-500 font-medium">Plan your future and track your progress toward milestones.</p>
         </div>
       </div>
 
-      {!goal ? (
-        /* গোল সেট করার ফর্ম (Empty State) */
+      {!goal || !goal.title ? (
+        /* গোল সেট করার ফর্ম */
         <div className="bg-white p-12 rounded-[40px] border-2 border-dashed border-slate-200 text-center space-y-6">
           <div className="bg-indigo-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto text-indigo-600">
-            <TrendingUp size={40} />
+            <TrendingIcon size={40} />
           </div>
           <div>
             <h3 className="text-2xl font-bold text-slate-800">No active goal found</h3>
@@ -98,7 +106,7 @@ const SavingsGoal = () => {
                   <span className="badge badge-primary rounded-lg font-bold mb-2 uppercase tracking-widest text-[10px]">Active Goal</span>
                   <h3 className="text-3xl font-black text-slate-800 uppercase italic">{goal.title}</h3>
                 </div>
-                {isCompleted && <CheckCircle2 size={48} className="text-emerald-500 animate-bounce" />}
+                {isCompleted && <CheckIcon size={48} className="text-emerald-500 animate-bounce" />}
               </div>
 
               <div className="space-y-4">
@@ -106,7 +114,6 @@ const SavingsGoal = () => {
                   <p className="text-4xl font-black text-slate-900">৳{balance.toLocaleString()} <span className="text-lg text-slate-400 font-medium">/ ৳{goal.targetAmount.toLocaleString()}</span></p>
                   <p className="text-2xl font-black text-indigo-600">{progress}%</p>
                 </div>
-                {/* প্রগ্রেস বার */}
                 <div className="w-full bg-slate-100 rounded-full h-6 p-1">
                   <div 
                     className={`h-4 rounded-full transition-all duration-1000 ${isCompleted ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-500 to-indigo-400'}`} 
@@ -130,15 +137,13 @@ const SavingsGoal = () => {
 
               <button onClick={() => setGoal(null)} className="btn btn-ghost btn-sm text-slate-400 hover:text-rose-500 rounded-xl">Reset & New Goal</button>
             </div>
-            {/* Background Icon Decor */}
-            <Target size={200} className="absolute -bottom-10 -right-10 text-slate-50/50 -rotate-12" />
+            <TargetIcon size={200} className="absolute -bottom-10 -right-10 text-slate-50/50 -rotate-12" />
           </div>
 
-          {/* Monthly Insight Sidebar */}
           <div className="space-y-6">
             <div className="bg-indigo-900 p-8 rounded-[40px] text-white shadow-xl">
               <div className="flex items-center gap-3 mb-6">
-                <Clock className="text-indigo-300" />
+                <ClockIcon className="text-indigo-300" />
                 <h4 className="font-bold text-xl">Timeline Insight</h4>
               </div>
               <p className="text-indigo-100 leading-relaxed mb-6">
@@ -153,7 +158,7 @@ const SavingsGoal = () => {
             </div>
 
             <div className="bg-rose-50 p-6 rounded-[32px] border border-rose-100 flex gap-4">
-              <AlertCircle className="text-rose-500 shrink-0" />
+              <AlertIcon className="text-rose-500 shrink-0" />
               <p className="text-sm text-rose-700 font-medium">
                 <strong>Tip:</strong> Categorizing your expenses in the History tab helps identify where you can save more for this goal!
               </p>

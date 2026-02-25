@@ -25,26 +25,35 @@ const Register = () => {
 
       // ২. ফায়ারবেস সাইন-আপ
       const result = await signup(data.email, data.password);
+      
+      // ৩. ফায়ারবেস প্রোফাইল আপডেট
       await updateUserProfile(data.name, photoURL);
 
-      // ৩. ইউজার ইনফো (Security: Email Lowercase করা হয়েছে)
+      // ৪. ইউজার ইনফো অবজেক্ট (MongoDB এর জন্য)
       const userInfo = {
         name: data.name,
         email: data.email.toLowerCase(), 
         photo: photoURL,
+        role: "user", // Default role as per requirement
         uid: result.user?.uid,
-        role: "user",
+        createdAt: new Date(),
       };
 
-      // ৪. MongoDB-তে সেভ
+      // ৫. MongoDB-তে ইউজার ডাটা পাঠানো
+      // এখানে সরাসরি axios ব্যবহার করা হয়েছে কারণ নতুন ইউজারের কাছে তখনো JWT টোকেন নেই
       const res = await axios.post("http://localhost:3000/users", userInfo);
 
       if (res.data.insertedId) {
         toast.success("Account Created Successfully!");
-        navigate("/dashboard/userHome");
+        
+        // এখানে একটু ডিলে দেওয়া ভালো যাতে AuthProvider টোকেনটা সেট করার সময় পায়
+        setTimeout(() => {
+            navigate("/dashboard/userHome");
+        }, 1000);
       }
     } catch (error) {
       setLoading(false);
+      console.error("Registration Error:", error);
       const msg = error.code === 'auth/email-already-in-use' ? "Email already in use!" : error.message;
       toast.error(msg);
     } 

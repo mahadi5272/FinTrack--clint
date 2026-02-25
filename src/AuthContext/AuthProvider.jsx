@@ -1,42 +1,49 @@
 import React, { createContext, useEffect, useState } from "react";
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithPopup,
   signOut,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
-import { GoogleAuthProvider } from "firebase/auth";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase.config";
+import axios from "axios"; // axios ইনস্টল করা না থাকলে npm i axios করে নিন
 
 export const AuthContext = createContext();
-const google = new GoogleAuthProvider();
-const AuthProvider = ({ children }) => {
-  const [user, setuser] = useState(null);
-  const [loading, setloading] = useState(true);
-  const [role, setrole] = useState(null);
+const googleProvider = new GoogleAuthProvider();
 
-  // signup
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState(null);
+
+  // ১. সাইন আপ
   const signup = (email, password) => {
+    setLoading(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
-  // signIn
+
+  // ২. সাইন ইন
   const signIn = (email, password) => {
+    setLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
-  // signOut
+
+  // ৩. লগ আউট
   const LogOut = () => {
-    setloading(true);
+    setLoading(true);
     return signOut(auth);
   };
 
-  // signInWithGoogle
+  // ৪. গুগল দিয়ে সাইন ইন
   const signInWithGoogle = () => {
-    return signInWithPopup(auth, google);
+    setLoading(true);
+    return signInWithPopup(auth, googleProvider);
   };
-  // প্রোফাইল আপডেটের ফাংশনটি যোগ করুন
+
+  // ৫. প্রোফাইল আপডেট
   const updateUserProfile = (name, photo) => {
     return updateProfile(auth.currentUser, {
       displayName: name,
@@ -44,25 +51,44 @@ const AuthProvider = ({ children }) => {
     });
   };
 
+  // ৬. অথ অবজার্ভার এবং JWT লজিক
   useEffect(() => {
-    const unsubscrib = onAuthStateChanged(auth, (currentuser) => {
-      setuser(currentuser);
-      setloading(false);
-      if (currentuser) {
-        fetch(`http://localhost:3000/users/${currentuser.email}`)
-          .then(res => res.json())
-          .then((data) => {
-            setrole(data.role);
-            console.log("Database response:", data);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      
+      if (currentUser) {
+        // ইউজার লগইন থাকলে টোকেন সংগ্রহ করা
+        const userInfo = { email: currentUser.email };
+        axios.post('http://localhost:3000/jwt', userInfo)
+          .then(res => {
+            if (res.data.token) {
+              localStorage.setItem('access-token', res.data.token);
+              setLoading(false);
+            }
           })
-          .catch((err) => {
-            console.log("সার্ভার চালু নেই বা কানেকশন পাওয়া যাচ্ছে না");
-            console.log(err);
+          .catch(err => {
+            console.error("JWT Error:", err);
+            setLoading(false);
           });
+
+        // ইউজারের রোল চেক করা
+        axios.get(`http://localhost:3000/users/${currentUser.email}`)
+          .then(res => {
+            setRole(res.data.role);
+          })
+          .catch(() => console.log("Role fetch error"));
+
+      } else {
+        // ইউজার লগআউট করলে টোকেন মুছে ফেলা
+        localStorage.removeItem('access-token');
+        setRole(null);
+        setLoading(false);
       }
     });
-    return () => unsubscrib();
+
+    return () => unsubscribe();
   }, []);
+
   const authInfo = {
     loading,
     role,
@@ -73,8 +99,11 @@ const AuthProvider = ({ children }) => {
     signInWithGoogle,
     updateUserProfile,
   };
+
   return (
-    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={authInfo}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
