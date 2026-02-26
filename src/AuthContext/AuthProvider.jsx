@@ -61,14 +61,14 @@ const AuthProvider = ({ children }) => {
         
         try {
           // প্রথমে JWT টোকেন সংগ্রহ করা
-          const res = await axios.post('http://localhost:3000/jwt', userInfo);
+          const res = await axios.post('https://fintrack-server-4n3g.onrender.com/jwt', userInfo);
           
           if (res.data.token) {
             const token = res.data.token;
             localStorage.setItem('access-token', token);
 
             // টোকেন পাওয়ার পর সেটি হেডারে পাঠিয়ে রোল চেক করা
-            const roleRes = await axios.get(`http://localhost:3000/users/${currentUser.email}`, {
+            const roleRes = await axios.get(`https://fintrack-server-4n3g.onrender.com/users/${currentUser.email}`, {
               headers: {
                 authorization: `Bearer ${token}`
               }

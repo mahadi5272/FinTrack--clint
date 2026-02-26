@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { AuthContext } from "../AuthContext/AuthProvider";
 
 const axiosSecure = axios.create({
-    baseURL: 'http://localhost:3000'
+    baseURL: 'https://fintrack-server-4n3g.onrender.com'
 });
 
 const useAxiosSecure = () => {

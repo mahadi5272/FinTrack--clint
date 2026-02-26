@@ -7,24 +7,36 @@ import { ToastContainer } from "react-toastify";
 const RootLayOut = () => {
   return (
     <>
-      {/* এখানের গ্রেডিয়েন্টটি 'slate-50' (অত্যন্ত হালকা সাদাটে নীল) থেকে শুরু হয়েছে। 
-        এটি আপনার লোগোর নীল এবং সবুজ টেক্সটকে ১০০% ক্লিন এবং ভিজিবল রাখবে।
+      {/* বডি ব্যাকগ্রাউন্ড আপডেট: 
+        আমরা একটি 'Deep Navy Blue' ডার্ক গ্রেডিয়েন্ট ব্যবহার করছি যা লোগোর সবুজ এবং নীল রঙের সাথে 
+        চমৎকার কন্ট্রাস্ট তৈরি করবে। এটি অ্যাপটিকে অনেক বেশি প্রিমিয়াম লুক দেবে। 
       */}
-      <div className="min-h-screen bg-gradient-to-b from-gray-500 via-[#f8fafc] via-30% via-[#e2e8f0] to-[#0d9488] bg-fixed">
+      <div className="min-h-screen bg-[#070b15] text-white selection:bg-blue-500/30">
         
-        <header className="sticky top-0 z-50">
-          {/* Navbar-এ হালকা 'glassmorphism' ইফেক্ট দিলে লোগোটি আরও বেশি প্রিমিয়াম লাগবে।
-          */}
+        {/* ব্যাকগ্রাউন্ডে হালকা একটি গ্লোয়িং ইফেক্ট (ঐচ্ছিক কিন্তু সুন্দর লাগবে) */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 rounded-full blur-[120px]"></div>
+        </div>
+
+        <header className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/5 bg-[#070b15]/80">
+          {/* Navbar এখানে থাকবে */}
           <Navbar />
         </header>
         
-        <main className="min-h-screen">
+        <main className="relative z-10 min-h-[calc(100-vh-300px)]">
+          {/* পেজের কন্টেন্ট */}
           <Outlet />
         </main>
         
-        <footer>
+        <footer className="relative z-10 border-t border-white/5 bg-[#0a0f1d]">
           <Footer />
-          <ToastContainer position="top-center" autoClose={3000} />
+          <ToastContainer 
+            theme="dark" 
+            position="top-center" 
+            autoClose={3000} 
+            toastClassName="backdrop-blur-md bg-white/10 border border-white/20"
+          />
         </footer>
       </div>
     </>

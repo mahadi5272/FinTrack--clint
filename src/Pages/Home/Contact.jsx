@@ -29,7 +29,7 @@ const Contact = () => {
 
   const onSubmit = async (data) => {
     try {
-      const res = await axios.post("http://localhost:3000/contact", data);
+      const res = await axios.post("https://fintrack-server-4n3g.onrender.com/contact", data);
       if (res.data.insertedId) {
         Swal.fire({
           title: "Success!",

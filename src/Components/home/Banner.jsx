@@ -29,7 +29,7 @@ const Banner = () => {
         <SwiperSlide>
           <div className="relative group">
             <img
-              src="https://i.ibb.co.com/PvKWvzpp/images-3.jpg"
+              src="https://i.ibb.co.com/fVnCRys6/unnamed.webp"
               alt="Electricity"
               className="w-full h-[450px] object-cover transition-transform duration-1000 group-hover:scale-110"
             />
@@ -69,7 +69,7 @@ const Banner = () => {
         <SwiperSlide>
           <div className="relative group">
             <img
-              src="https://i.ibb.co.com/vCNQSQJ1/ezgif-com-gif-maker-62.webp"
+              src="https://i.ibb.co.com/Zzz1pBLv/original-69ebe40e12b873fe8fd4380de368d3c2.webp"
               alt="Water"
               className="w-full h-[450px] object-cover transition-transform duration-1000 group-hover:scale-110"
             />
@@ -104,7 +104,7 @@ const Banner = () => {
         <SwiperSlide>
           <div className="relative group">
             <img
-              src="https://i.ibb.co.com/tMb27jjL/The-Importance-of-Time-Management-for-Workplace-Leaders.png"
+              src="https://i.ibb.co.com/RTdYHCFH/images.png"
               alt="Internet"
               className="w-full h-[450px] object-cover transition-transform duration-1000 group-hover:scale-110"
             />
